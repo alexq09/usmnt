@@ -36,7 +36,7 @@ export function PlayerModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-y-auto">
+      <DialogContent className="max-w-[1400px] w-[95vw] max-h-[95vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>

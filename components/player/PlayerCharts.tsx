@@ -28,7 +28,13 @@ interface ChartDataPoint {
 }
 
 export function PlayerCharts({ timeline }: PlayerChartsProps) {
-  const chartData: ChartDataPoint[] = timeline.map((match) => ({
+  const sortedTimeline = [...timeline].sort((a, b) => {
+    const dateA = a.kickoff_utc ? new Date(a.kickoff_utc).getTime() : 0;
+    const dateB = b.kickoff_utc ? new Date(b.kickoff_utc).getTime() : 0;
+    return dateA - dateB;
+  });
+
+  const chartData: ChartDataPoint[] = sortedTimeline.map((match) => ({
     date: match.kickoff_utc
       ? new Date(match.kickoff_utc).toLocaleDateString("en-US", {
           month: "short",
