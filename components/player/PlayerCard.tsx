@@ -42,29 +42,41 @@ export function PlayerCard({ player, onClick }: PlayerCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
           <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Goals</p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Goals</p>
             <p className="font-semibold text-slate-900 dark:text-slate-100">
               {player.total_goals || 0}
             </p>
           </div>
           <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Assists</p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Assists</p>
             <p className="font-semibold text-slate-900 dark:text-slate-100">
               {player.total_assists || 0}
             </p>
           </div>
           <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Pass %</p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Minutes</p>
+            <p className="font-semibold text-slate-900 dark:text-slate-100">
+              {player.total_minutes?.toLocaleString() || 0}
+            </p>
+          </div>
+          <div>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Pass %</p>
             <p className="font-semibold text-slate-900 dark:text-slate-100">
               {player.pass_completion_pct?.toFixed(1) || "N/A"}%
             </p>
           </div>
           <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Minutes</p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Tackles/90</p>
             <p className="font-semibold text-slate-900 dark:text-slate-100">
-              {player.total_minutes?.toLocaleString() || 0}
+              {player.tackles_per_90?.toFixed(2) || "N/A"}
+            </p>
+          </div>
+          <div>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Interceptions/90</p>
+            <p className="font-semibold text-slate-900 dark:text-slate-100">
+              {player.interceptions_per_90?.toFixed(2) || "N/A"}
             </p>
           </div>
         </div>
