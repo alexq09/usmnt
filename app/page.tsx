@@ -1,24 +1,42 @@
-import { supabase } from "@/lib/supabase/supabase";
-import { PlayerGrid } from "@/components/player/PlayerGrid";
+import {
+  getTeamStats,
+  getTopPerformers,
+  getMatchTrends,
+} from "@/lib/dashboard-data";
+import { StatsCards } from "@/components/dashboard/StatsCards";
+import { TopPerformers } from "@/components/dashboard/TopPerformers";
+import { TeamCharts } from "@/components/dashboard/TeamCharts";
 
 export default async function Home() {
-  const { data: players } = await supabase
-    .from("player_overview")
-    .select("*")
-    .order("total_minutes", { ascending: false });
+  const [teamStats, topPerformers, matchTrends] = await Promise.all([
+    getTeamStats(),
+    getTopPerformers(),
+    getMatchTrends(),
+  ]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8">
+        <div className="mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            USMNT Player Stats
+            USMNT Dashboard
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            Click any player to view detailed statistics and performance charts
+            Team performance insights and player analytics
           </p>
         </div>
-        <PlayerGrid players={players || []} />
+
+        <div className="space-y-10">
+          <StatsCards stats={teamStats} />
+
+          <TopPerformers
+            topScorers={topPerformers.topScorers}
+            topAssisters={topPerformers.topAssisters}
+            topRated={topPerformers.topRated}
+          />
+
+          <TeamCharts matchTrends={matchTrends} />
+        </div>
       </div>
     </div>
   );
