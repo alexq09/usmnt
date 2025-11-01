@@ -39,6 +39,7 @@ export function PlayerCharts({ timeline }: PlayerChartsProps) {
       ? new Date(match.kickoff_utc).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
+          year: "2-digit",
         })
       : "Unknown",
     opponent: match.opponent_name || "Unknown",
