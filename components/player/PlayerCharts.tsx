@@ -21,6 +21,8 @@ interface PlayerChartsProps {
 
 interface ChartDataPoint {
   date: string;
+  fullDate: string;
+  timestamp: number;
   opponent: string;
   matchRating: number | null;
   passCompletion: number | null;
@@ -28,18 +30,29 @@ interface ChartDataPoint {
 }
 
 export function PlayerCharts({ timeline }: PlayerChartsProps) {
-  const chartData: ChartDataPoint[] = timeline.map((match) => ({
-    date: match.kickoff_utc
-      ? new Date(match.kickoff_utc).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        })
-      : "Unknown",
-    opponent: match.opponent_name || "Unknown",
-    matchRating: match.match_rating,
-    passCompletion: match.pass_completion_pct,
-    defActions: match.def_actions_per_90,
-  }));
+  const chartData: ChartDataPoint[] = timeline.map((match) => {
+    const dateObj = match.kickoff_utc ? new Date(match.kickoff_utc) : null;
+    return {
+      date: dateObj
+        ? dateObj.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          })
+        : "Unknown",
+      fullDate: dateObj
+        ? dateObj.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : "Unknown",
+      timestamp: dateObj ? dateObj.getTime() : 0,
+      opponent: match.opponent_name || "Unknown",
+      matchRating: match.match_rating,
+      passCompletion: match.pass_completion_pct,
+      defActions: match.def_actions_per_90,
+    };
+  });
 
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { payload: ChartDataPoint; color: string; name: string; value: number }[] }) => {
     if (active && payload && payload.length) {
@@ -50,7 +63,7 @@ export function PlayerCharts({ timeline }: PlayerChartsProps) {
             vs {data.opponent}
           </p>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            {data.date}
+            {data.fullDate}
           </p>
           {payload.map((entry, index: number) => (
             <p
@@ -84,7 +97,16 @@ export function PlayerCharts({ timeline }: PlayerChartsProps) {
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
               <XAxis
-                dataKey="date"
+                dataKey="timestamp"
+                type="number"
+                domain={['dataMin', 'dataMax']}
+                tickFormatter={(timestamp) => {
+                  const date = new Date(timestamp);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                }}
                 className="text-xs text-slate-600 dark:text-slate-400"
               />
               <YAxis
@@ -118,7 +140,16 @@ export function PlayerCharts({ timeline }: PlayerChartsProps) {
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
               <XAxis
-                dataKey="date"
+                dataKey="timestamp"
+                type="number"
+                domain={['dataMin', 'dataMax']}
+                tickFormatter={(timestamp) => {
+                  const date = new Date(timestamp);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                }}
                 className="text-xs text-slate-600 dark:text-slate-400"
               />
               <YAxis
@@ -152,7 +183,16 @@ export function PlayerCharts({ timeline }: PlayerChartsProps) {
             <AreaChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
               <XAxis
-                dataKey="date"
+                dataKey="timestamp"
+                type="number"
+                domain={['dataMin', 'dataMax']}
+                tickFormatter={(timestamp) => {
+                  const date = new Date(timestamp);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                }}
                 className="text-xs text-slate-600 dark:text-slate-400"
               />
               <YAxis className="text-xs text-slate-600 dark:text-slate-400" />
