@@ -243,9 +243,8 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
           {edgesWithCoordinates.map((edgeData, idx) => {
             if (!edgeData) return null;
             return (
-              <>
+              <div key={`edge-group-${idx}`}>
                 <Polyline
-                  key={`line-${idx}`}
                   positions={[edgeData.fromCoords, edgeData.toCoords]}
                   color={edgeData.color}
                   weight={3}
@@ -282,12 +281,11 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
                   </Popup>
                 </Polyline>
                 <Marker
-                  key={`arrow-${idx}`}
                   position={edgeData.midCoords}
                   icon={createArrowIcon(edgeData.bearing, edgeData.color)}
                   opacity={edgeData.edge.is_potential ? 0.4 : 0.7}
                 />
-              </>
+              </div>
             );
           })}
 
