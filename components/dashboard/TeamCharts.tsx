@@ -5,8 +5,6 @@ import { MatchTrend } from "@/lib/dashboard-data";
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -25,10 +23,20 @@ interface ChartDataPoint {
   goalsFor: number;
   goalsAgainst: number;
   points: number;
+  rollingAvg5: number | null;
+  rollingAvg10: number | null;
+}
+
+function calculateRollingAverage(data: number[], index: number, window: number): number | null {
+  if (index < window - 1) return null;
+  const slice = data.slice(Math.max(0, index - window + 1), index + 1);
+  return slice.reduce((sum, val) => sum + val, 0) / slice.length;
 }
 
 export function TeamCharts({ matchTrends }: TeamChartsProps) {
-  const chartData: ChartDataPoint[] = matchTrends.map((match) => ({
+  const points = matchTrends.map((match) => match.points);
+
+  const chartData: ChartDataPoint[] = matchTrends.map((match, index) => ({
     date: match.date
       ? new Date(match.date).toLocaleDateString("en-US", {
           month: "short",
@@ -40,6 +48,8 @@ export function TeamCharts({ matchTrends }: TeamChartsProps) {
     goalsFor: match.goalsFor,
     goalsAgainst: match.goalsAgainst,
     points: match.points,
+    rollingAvg5: calculateRollingAverage(points, index, 5),
+    rollingAvg10: calculateRollingAverage(points, index, 10),
   }));
 
   const CustomTooltip = ({
@@ -134,12 +144,15 @@ export function TeamCharts({ matchTrends }: TeamChartsProps) {
       <Card className="border-slate-200 dark:border-slate-800">
         <CardHeader>
           <CardTitle className="text-slate-900 dark:text-slate-100">
-            Points Per Match (W=3, D=1, L=0)
+            Team Form - Rolling Average Points Per Match
           </CardTitle>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+            5-match and 10-match rolling averages (W=3, D=1, L=0)
+          </p>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={chartData}>
+            <LineChart data={chartData}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 className="stroke-slate-200 dark:stroke-slate-800"
@@ -153,18 +166,32 @@ export function TeamCharts({ matchTrends }: TeamChartsProps) {
               />
               <YAxis
                 domain={[0, 3]}
-                ticks={[0, 1, 2, 3]}
+                ticks={[0, 0.5, 1, 1.5, 2, 2.5, 3]}
                 className="text-xs text-slate-600 dark:text-slate-400"
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Bar
-                dataKey="points"
-                name="Points"
-                fill="#10b981"
-                radius={[4, 4, 0, 0]}
+              <Line
+                type="monotone"
+                dataKey="rollingAvg5"
+                name="5-Match Avg"
+                stroke="#10b981"
+                strokeWidth={3}
+                dot={{ fill: "#10b981", r: 4 }}
+                activeDot={{ r: 6 }}
+                connectNulls
               />
-            </BarChart>
+              <Line
+                type="monotone"
+                dataKey="rollingAvg10"
+                name="10-Match Avg"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dot={{ fill: "#3b82f6", r: 3 }}
+                activeDot={{ r: 5 }}
+                connectNulls
+              />
+            </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
