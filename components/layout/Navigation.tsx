@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, VisuallyHidden } from "@/components/ui/sheet";
 
 export function Navigation() {
   const [open, setOpen] = useState(false);
@@ -56,6 +56,9 @@ export function Navigation() {
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[250px] sm:w-[300px]">
+                <VisuallyHidden>
+                  <SheetTitle>Navigation Menu</SheetTitle>
+                </VisuallyHidden>
                 <div className="flex flex-col gap-6 mt-8">
                   <div className="flex flex-col gap-3">
                     {navLinks.map((link) => (

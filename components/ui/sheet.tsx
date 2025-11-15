@@ -10,6 +10,10 @@ const SheetClose = SheetPrimitive.Close
 
 const SheetPortal = SheetPrimitive.Portal
 
+const SheetTitle = SheetPrimitive.Title
+
+const SheetDescription = SheetPrimitive.Description
+
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
@@ -58,4 +62,29 @@ const SheetContent = React.forwardRef<
 ))
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
-export { Sheet, SheetTrigger, SheetClose, SheetContent }
+const VisuallyHidden = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ children, ...props }, ref) => (
+  <span
+    ref={ref}
+    style={{
+      position: "absolute",
+      border: 0,
+      width: "1px",
+      height: "1px",
+      padding: 0,
+      margin: "-1px",
+      overflow: "hidden",
+      clip: "rect(0, 0, 0, 0)",
+      whiteSpace: "nowrap",
+      wordWrap: "normal",
+    }}
+    {...props}
+  >
+    {children}
+  </span>
+))
+VisuallyHidden.displayName = "VisuallyHidden"
+
+export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetTitle, SheetDescription, VisuallyHidden }
