@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResultCorrelationMetric } from "@/lib/dashboard-data";
+import { Info } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -137,7 +138,17 @@ export function WinLossDrivers({ metrics }: WinLossDriversProps) {
                   className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                 >
                   <td className="py-3 px-4 text-slate-900 dark:text-slate-100">
-                    {metric.metric_label || "Unknown"}
+                    <div className="flex items-center gap-2">
+                      {metric.metric_label || "Unknown"}
+                      {metric.metric_key === "defensive_actions" && (
+                        <div className="group relative inline-block">
+                          <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-help" />
+                          <div className="invisible group-hover:visible absolute left-0 top-6 z-10 w-64 p-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs rounded shadow-lg">
+                            Defensive actions = tackles + interceptions + blocks + recoveries
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="text-right py-3 px-4 text-slate-700 dark:text-slate-300">
                     {formatValue(metric.avg_win, metric.metric_key)}
