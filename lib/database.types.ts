@@ -185,6 +185,7 @@ export type Database = {
           kickoff_utc: string | null
           opponent_name: string
           opponent_score: number
+          pen_result: boolean | null
           possession_pct: number | null
           reason_long: string | null
           reason_short: string | null
@@ -204,6 +205,7 @@ export type Database = {
           kickoff_utc?: string | null
           opponent_name: string
           opponent_score: number
+          pen_result?: boolean | null
           possession_pct?: number | null
           reason_long?: string | null
           reason_short?: string | null
@@ -223,6 +225,7 @@ export type Database = {
           kickoff_utc?: string | null
           opponent_name?: string
           opponent_score?: number
+          pen_result?: boolean | null
           possession_pct?: number | null
           reason_long?: string | null
           reason_short?: string | null
@@ -382,6 +385,102 @@ export type Database = {
           id?: number
           last_name?: string | null
           position?: string | null
+        }
+        Relationships: []
+      }
+      tournament_map_edges: {
+        Row: {
+          from_location_id: number
+          id: number
+          is_potential: boolean
+          scenario_key: string
+          to_location_id: number
+        }
+        Insert: {
+          from_location_id: number
+          id?: number
+          is_potential?: boolean
+          scenario_key: string
+          to_location_id: number
+        }
+        Update: {
+          from_location_id?: number
+          id?: number
+          is_potential?: boolean
+          scenario_key?: string
+          to_location_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_map_edges_from_location_id_fkey"
+            columns: ["from_location_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_map_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_map_edges_to_location_id_fkey"
+            columns: ["to_location_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_map_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_map_locations: {
+        Row: {
+          city: string
+          country: string
+          display_order: number
+          group_label: string | null
+          id: number
+          is_group_stage: boolean
+          is_knockout: boolean
+          is_potential: boolean
+          label: string
+          latitude: number
+          longitude: number
+          matchday: number | null
+          scenario_key: string
+          stadium_name: string
+          stage_type: string
+          state: string | null
+        }
+        Insert: {
+          city: string
+          country?: string
+          display_order: number
+          group_label?: string | null
+          id?: number
+          is_group_stage?: boolean
+          is_knockout?: boolean
+          is_potential?: boolean
+          label: string
+          latitude: number
+          longitude: number
+          matchday?: number | null
+          scenario_key: string
+          stadium_name: string
+          stage_type: string
+          state?: string | null
+        }
+        Update: {
+          city?: string
+          country?: string
+          display_order?: number
+          group_label?: string | null
+          id?: number
+          is_group_stage?: boolean
+          is_knockout?: boolean
+          is_potential?: boolean
+          label?: string
+          latitude?: number
+          longitude?: number
+          matchday?: number | null
+          scenario_key?: string
+          stadium_name?: string
+          stage_type?: string
+          state?: string | null
         }
         Relationships: []
       }
