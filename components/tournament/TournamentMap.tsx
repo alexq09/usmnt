@@ -16,6 +16,13 @@ interface TournamentMapProps {
   edges: Edge[];
 }
 
+interface LocationGroup {
+  key: string;
+  latitude: number;
+  longitude: number;
+  locations: Location[];
+}
+
 const SCENARIO_OPTIONS = [
   { value: "group", label: "Group Stage" },
   { value: "1", label: "1st Place Finish" },
@@ -53,6 +60,34 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
     return { filteredLocations, filteredEdges };
   }, [locations, edges, selectedScenario]);
 
+  const groupedLocations = useMemo(() => {
+    const groups: { [key: string]: LocationGroup } = {};
+
+    filteredData.filteredLocations.forEach((location) => {
+      const key = `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)}`;
+
+      if (!groups[key]) {
+        groups[key] = {
+          key,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          locations: [],
+        };
+      }
+
+      groups[key].locations.push(location);
+    });
+
+    Object.values(groups).forEach(group => {
+      group.locations.sort((a, b) => {
+        const stageOrder = ["group", "round_of_32", "round_of_16", "quarterfinal", "semi_final", "final"];
+        return stageOrder.indexOf(a.stage_type) - stageOrder.indexOf(b.stage_type);
+      });
+    });
+
+    return Object.values(groups);
+  }, [filteredData.filteredLocations]);
+
   const edgesWithCoordinates = useMemo(() => {
     return filteredData.filteredEdges.map((edge) => {
       const fromLoc = filteredData.filteredLocations.find((l) => l.id === edge.from_location_id);
@@ -72,7 +107,42 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
   const center: LatLngExpression = [39.8283, -98.5795];
   const zoom = 4;
 
-  const createCustomIcon = (location: Location) => {
+  const createCustomIcon = (group: LocationGroup) => {
+    const hasMultiple = group.locations.length > 1;
+
+    if (hasMultiple) {
+      const colors = group.locations.map(loc => STAGE_COLORS[loc.stage_type] || "#64748b");
+      const uniqueColors = [...new Set(colors)];
+
+      return divIcon({
+        html: `
+          <div style="
+            width: 32px;
+            height: 32px;
+            background: conic-gradient(${uniqueColors.map((color, i) =>
+              `${color} ${(i / uniqueColors.length) * 360}deg ${((i + 1) / uniqueColors.length) * 360}deg`
+            ).join(", ")});
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+          ">
+            ${group.locations.length}
+          </div>
+        `,
+        className: "",
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
+    }
+
+    const location = group.locations[0];
     const color = STAGE_COLORS[location.stage_type] || "#64748b";
     const isPotential = location.is_potential;
 
@@ -150,33 +220,63 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
             );
           })}
 
-          {filteredData.filteredLocations.map((location) => (
+          {groupedLocations.map((group) => (
             <Marker
-              key={location.id}
-              position={[location.latitude, location.longitude]}
-              icon={createCustomIcon(location)}
+              key={group.key}
+              position={[group.latitude, group.longitude]}
+              icon={createCustomIcon(group)}
             >
-              <Popup>
+              <Popup maxWidth={300}>
                 <div className="text-sm">
-                  <h3 className="font-bold text-base mb-1">{location.label}</h3>
-                  <p className="text-slate-600">
-                    {location.city}
-                    {location.state && `, ${location.state}`}
-                  </p>
-                  <p className="text-slate-600">{location.stadium_name}</p>
-                  <p className="mt-2 text-xs">
-                    <span className="font-semibold capitalize">
-                      {location.stage_type.replace(/_/g, " ")}
-                    </span>
-                  </p>
-                  {location.group_label && (
-                    <p className="text-xs text-slate-500">{location.group_label}</p>
-                  )}
-                  {location.matchday && (
-                    <p className="text-xs text-slate-500">Matchday {location.matchday}</p>
-                  )}
-                  {location.is_potential && (
-                    <p className="text-xs text-amber-600 mt-1">Potential Location</p>
+                  <h3 className="font-bold text-base mb-2">
+                    {group.locations[0].city}
+                    {group.locations[0].state && `, ${group.locations[0].state}`}
+                  </h3>
+                  <p className="text-slate-600 mb-3">{group.locations[0].stadium_name}</p>
+
+                  {group.locations.length > 1 ? (
+                    <div className="space-y-2">
+                      <p className="font-semibold text-xs text-slate-500 uppercase tracking-wide">
+                        {group.locations.length} Matches
+                      </p>
+                      {group.locations.map((location) => (
+                        <div
+                          key={location.id}
+                          className="border-l-4 pl-3 py-1"
+                          style={{ borderColor: STAGE_COLORS[location.stage_type] || "#64748b" }}
+                        >
+                          <p className="font-semibold capitalize text-sm">
+                            {location.stage_type.replace(/_/g, " ")}
+                          </p>
+                          {location.group_label && (
+                            <p className="text-xs text-slate-600">{location.group_label}</p>
+                          )}
+                          {location.matchday && (
+                            <p className="text-xs text-slate-600">Matchday {location.matchday}</p>
+                          )}
+                          {location.is_potential && (
+                            <p className="text-xs text-amber-600">Potential</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="mt-2 text-xs">
+                        <span className="font-semibold capitalize">
+                          {group.locations[0].stage_type.replace(/_/g, " ")}
+                        </span>
+                      </p>
+                      {group.locations[0].group_label && (
+                        <p className="text-xs text-slate-500">{group.locations[0].group_label}</p>
+                      )}
+                      {group.locations[0].matchday && (
+                        <p className="text-xs text-slate-500">Matchday {group.locations[0].matchday}</p>
+                      )}
+                      {group.locations[0].is_potential && (
+                        <p className="text-xs text-amber-600 mt-1">Potential Location</p>
+                      )}
+                    </div>
                   )}
                 </div>
               </Popup>
