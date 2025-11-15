@@ -22,7 +22,6 @@ const PERCENTAGE_METRICS = [
   "shot_accuracy",
   "pass_completion",
   "duel_win_pct",
-  "possession_pct",
 ];
 
 function isPercentageMetric(metricKey: string | null): boolean {
@@ -33,13 +32,15 @@ function isPercentageMetric(metricKey: string | null): boolean {
 function formatValue(value: number | null, metricKey: string | null): string {
   if (value === null) return "-";
   if (isPercentageMetric(metricKey)) {
-    return `${value.toFixed(1)}%`;
+    return `${(value * 100).toFixed(1)}%`;
   }
   return value.toFixed(2);
 }
 
 export function WinLossDrivers({ metrics }: WinLossDriversProps) {
-  const chartData = metrics.map((m) => ({
+  const filteredMetrics = metrics.filter((m) => m.metric_key !== "possession_pct");
+
+  const chartData = filteredMetrics.map((m) => ({
     metric: m.metric_label || "Unknown",
     delta: m.delta_win_loss || 0,
     metricKey: m.metric_key,
@@ -120,7 +121,7 @@ export function WinLossDrivers({ metrics }: WinLossDriversProps) {
               </tr>
             </thead>
             <tbody>
-              {metrics.map((metric, index) => (
+              {filteredMetrics.map((metric, index) => (
                 <tr
                   key={index}
                   className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
