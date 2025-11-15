@@ -98,6 +98,13 @@ export type Database = {
             foreignKeyName: "match_events_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
+            referencedRelation: "match_team_stats"
+            referencedColumns: ["match_id"]
+          },
+          {
+            foreignKeyName: "match_events_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
             referencedRelation: "matches"
             referencedColumns: ["id"]
           },
@@ -331,6 +338,13 @@ export type Database = {
             foreignKeyName: "player_match_stats_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
+            referencedRelation: "match_team_stats"
+            referencedColumns: ["match_id"]
+          },
+          {
+            foreignKeyName: "player_match_stats_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
             referencedRelation: "matches"
             referencedColumns: ["id"]
           },
@@ -486,6 +500,44 @@ export type Database = {
       }
     }
     Views: {
+      match_team_stats: {
+        Row: {
+          accurate_passes: number | null
+          blocks: number | null
+          chances_created: number | null
+          competition_id: number | null
+          defensive_actions: number | null
+          duel_win_pct: number | null
+          fouled: number | null
+          fouls_committed: number | null
+          goal_diff: number | null
+          interceptions: number | null
+          kickoff_utc: string | null
+          match_id: number | null
+          opponent_name: string | null
+          opponent_score: number | null
+          pass_completion: number | null
+          possession_pct: number | null
+          recoveries: number | null
+          result_char: string | null
+          shot_accuracy: number | null
+          shots_on_target: number | null
+          tackles: number | null
+          total_passes: number | null
+          total_shots: number | null
+          touches_in_box: number | null
+          usa_score: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_advanced_summary: {
         Row: {
           avg_match_rating: number | null
@@ -569,6 +621,17 @@ export type Database = {
           total_assists: number | null
           total_goals: number | null
           total_minutes: number | null
+        }
+        Relationships: []
+      }
+      result_correlation_metrics: {
+        Row: {
+          avg_draw: number | null
+          avg_loss: number | null
+          avg_win: number | null
+          delta_win_loss: number | null
+          metric_key: string | null
+          metric_label: string | null
         }
         Relationships: []
       }
