@@ -24,7 +24,6 @@ interface LocationGroup {
 }
 
 const SCENARIO_OPTIONS = [
-  { value: "group", label: "Group Stage" },
   { value: "1", label: "1st Place Finish" },
   { value: "2", label: "2nd Place Finish" },
   { value: "3", label: "3rd Place Finish" },
@@ -46,7 +45,7 @@ function MapUpdater({ center, zoom }: { center: LatLngExpression; zoom: number }
 }
 
 export function TournamentMap({ locations, edges }: TournamentMapProps) {
-  const [selectedScenario, setSelectedScenario] = useState<string>("group");
+  const [selectedScenario, setSelectedScenario] = useState<string>("1");
   const [showListView, setShowListView] = useState<boolean>(false);
 
   const filteredData = useMemo(() => {
@@ -55,7 +54,7 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
     );
 
     const filteredEdges = edges.filter(
-      (edge) => edge.scenario_key === "group" || edge.scenario_key === selectedScenario
+      (edge) => edge.scenario_key === selectedScenario
     );
 
     return { filteredLocations, filteredEdges };
@@ -200,15 +199,12 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
   };
 
   const tournamentPath = useMemo(() => {
-    if (selectedScenario === "group") return [];
-
     const stageOrder = ["group", "round_of_32", "round_of_16", "quarterfinal", "semi_final", "final"];
     const pathLocations = filteredData.filteredLocations
-      .filter(loc => loc.scenario_key === selectedScenario)
       .sort((a, b) => stageOrder.indexOf(a.stage_type) - stageOrder.indexOf(b.stage_type));
 
     return pathLocations;
-  }, [filteredData.filteredLocations, selectedScenario]);
+  }, [filteredData.filteredLocations]);
 
   return (
     <Card className="p-6">
@@ -223,15 +219,13 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
             {option.label}
           </Button>
         ))}
-        {selectedScenario !== "group" && (
-          <Button
-            variant={showListView ? "default" : "outline"}
-            onClick={() => setShowListView(!showListView)}
-            className="transition-all ml-auto"
-          >
-            {showListView ? "Show Map" : "Show Path List"}
-          </Button>
-        )}
+        <Button
+          variant={showListView ? "default" : "outline"}
+          onClick={() => setShowListView(!showListView)}
+          className="transition-all ml-auto"
+        >
+          {showListView ? "Show Map" : "Show Path List"}
+        </Button>
       </div>
 
       {!showListView && (
