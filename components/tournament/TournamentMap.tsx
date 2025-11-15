@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from "react-leaflet";
-import { LatLngExpression, divIcon } from "leaflet";
+import { LatLngExpression, divIcon, LatLng } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -95,17 +95,51 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
 
       if (!fromLoc || !toLoc) return null;
 
+      const fromCoords = new LatLng(fromLoc.latitude, fromLoc.longitude);
+      const toCoords = new LatLng(toLoc.latitude, toLoc.longitude);
+
+      const bearing = Math.atan2(
+        toCoords.lng - fromCoords.lng,
+        toCoords.lat - fromCoords.lat
+      ) * (180 / Math.PI);
+
+      const midLat = (fromLoc.latitude + toLoc.latitude) / 2;
+      const midLng = (fromLoc.longitude + toLoc.longitude) / 2;
+
       return {
         edge,
         fromCoords: [fromLoc.latitude, fromLoc.longitude] as LatLngExpression,
         toCoords: [toLoc.latitude, toLoc.longitude] as LatLngExpression,
+        midCoords: [midLat, midLng] as LatLngExpression,
+        bearing,
         color: STAGE_COLORS[toLoc.stage_type] || "#64748b",
+        fromLocation: fromLoc,
+        toLocation: toLoc,
       };
     }).filter(Boolean);
   }, [filteredData]);
 
   const center: LatLngExpression = [39.8283, -98.5795];
   const zoom = 4;
+
+  const createArrowIcon = (bearing: number, color: string) => {
+    return divIcon({
+      html: `
+        <div style="
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-bottom: 16px solid ${color};
+          transform: rotate(${bearing}deg);
+          filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+        "></div>
+      `,
+      className: "",
+      iconSize: [16, 16],
+      iconAnchor: [8, 8],
+    });
+  };
 
   const createCustomIcon = (group: LocationGroup) => {
     const hasMultiple = group.locations.length > 1;
@@ -209,14 +243,51 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
           {edgesWithCoordinates.map((edgeData, idx) => {
             if (!edgeData) return null;
             return (
-              <Polyline
-                key={idx}
-                positions={[edgeData.fromCoords, edgeData.toCoords]}
-                color={edgeData.color}
-                weight={3}
-                opacity={edgeData.edge.is_potential ? 0.4 : 0.7}
-                dashArray={edgeData.edge.is_potential ? "10, 10" : undefined}
-              />
+              <>
+                <Polyline
+                  key={`line-${idx}`}
+                  positions={[edgeData.fromCoords, edgeData.toCoords]}
+                  color={edgeData.color}
+                  weight={3}
+                  opacity={edgeData.edge.is_potential ? 0.4 : 0.7}
+                  dashArray={edgeData.edge.is_potential ? "10, 10" : undefined}
+                  eventHandlers={{
+                    click: () => {},
+                  }}
+                >
+                  <Popup>
+                    <div className="text-sm">
+                      <p className="font-bold mb-1">Tournament Path</p>
+                      <p className="text-xs text-slate-600">
+                        <span className="font-semibold">From:</span> {edgeData.fromLocation.city}
+                        {edgeData.fromLocation.state && `, ${edgeData.fromLocation.state}`}
+                      </p>
+                      <p className="text-xs text-slate-600 mb-2">
+                        <span className="font-semibold">To:</span> {edgeData.toLocation.city}
+                        {edgeData.toLocation.state && `, ${edgeData.toLocation.state}`}
+                      </p>
+                      <p className="text-xs">
+                        <span
+                          className="inline-block w-3 h-3 rounded-full mr-1"
+                          style={{ backgroundColor: edgeData.color }}
+                        ></span>
+                        <span className="font-semibold capitalize">
+                          {edgeData.toLocation.stage_type.replace(/_/g, " ")}
+                        </span>
+                      </p>
+                      {edgeData.edge.is_potential && (
+                        <p className="text-xs text-amber-600 mt-1">Potential Path</p>
+                      )}
+                    </div>
+                  </Popup>
+                </Polyline>
+                <Marker
+                  key={`arrow-${idx}`}
+                  position={edgeData.midCoords}
+                  icon={createArrowIcon(edgeData.bearing, edgeData.color)}
+                  opacity={edgeData.edge.is_potential ? 0.4 : 0.7}
+                />
+              </>
             );
           })}
 
