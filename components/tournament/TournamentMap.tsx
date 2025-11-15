@@ -47,6 +47,7 @@ function MapUpdater({ center, zoom }: { center: LatLngExpression; zoom: number }
 
 export function TournamentMap({ locations, edges }: TournamentMapProps) {
   const [selectedScenario, setSelectedScenario] = useState<string>("group");
+  const [showListView, setShowListView] = useState<boolean>(false);
 
   const filteredData = useMemo(() => {
     const filteredLocations = locations.filter(
@@ -198,9 +199,20 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
     });
   };
 
+  const tournamentPath = useMemo(() => {
+    if (selectedScenario === "group") return [];
+
+    const stageOrder = ["group", "round_of_32", "round_of_16", "quarterfinal", "semi_final", "final"];
+    const pathLocations = filteredData.filteredLocations
+      .filter(loc => loc.scenario_key === selectedScenario)
+      .sort((a, b) => stageOrder.indexOf(a.stage_type) - stageOrder.indexOf(b.stage_type));
+
+    return pathLocations;
+  }, [filteredData.filteredLocations, selectedScenario]);
+
   return (
     <Card className="p-6">
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-6 flex flex-wrap gap-2 items-center">
         {SCENARIO_OPTIONS.map((option) => (
           <Button
             key={option.value}
@@ -211,23 +223,88 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
             {option.label}
           </Button>
         ))}
+        {selectedScenario !== "group" && (
+          <Button
+            variant={showListView ? "default" : "outline"}
+            onClick={() => setShowListView(!showListView)}
+            className="transition-all ml-auto"
+          >
+            {showListView ? "Show Map" : "Show Path List"}
+          </Button>
+        )}
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-4 text-sm">
-        {Object.entries(STAGE_COLORS).map(([stage, color]) => (
-          <div key={stage} className="flex items-center gap-2">
-            <div
-              className="w-4 h-4 rounded-full border-2 border-white shadow"
-              style={{ backgroundColor: color }}
-            />
-            <span className="capitalize text-slate-600 dark:text-slate-400">
-              {stage.replace(/_/g, " ")}
-            </span>
+      {!showListView && (
+        <div className="mb-4 flex flex-wrap gap-4 text-sm">
+          {Object.entries(STAGE_COLORS).map(([stage, color]) => (
+            <div key={stage} className="flex items-center gap-2">
+              <div
+                className="w-4 h-4 rounded-full border-2 border-white shadow"
+                style={{ backgroundColor: color }}
+              />
+              <span className="capitalize text-slate-600 dark:text-slate-400">
+                {stage.replace(/_/g, " ")}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showListView ? (
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold mb-4">
+            Tournament Path - {SCENARIO_OPTIONS.find(o => o.value === selectedScenario)?.label}
+          </h3>
+          <div className="space-y-3">
+            {tournamentPath.map((location, idx) => (
+              <div
+                key={location.id}
+                className="flex items-start gap-4 p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+              >
+                <div className="flex flex-col items-center">
+                  <div
+                    className="w-8 h-8 rounded-full border-3 border-white shadow-md flex items-center justify-center text-white font-bold text-sm"
+                    style={{ backgroundColor: STAGE_COLORS[location.stage_type] || "#64748b" }}
+                  >
+                    {idx + 1}
+                  </div>
+                  {idx < tournamentPath.length - 1 && (
+                    <div className="w-0.5 h-8 bg-slate-300 dark:bg-slate-600 my-1"></div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className="px-2 py-1 rounded text-xs font-semibold text-white capitalize"
+                      style={{ backgroundColor: STAGE_COLORS[location.stage_type] || "#64748b" }}
+                    >
+                      {location.stage_type.replace(/_/g, " ")}
+                    </span>
+                    {location.is_potential && (
+                      <span className="px-2 py-1 rounded text-xs font-semibold bg-amber-100 text-amber-800">
+                        Potential
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="font-bold text-lg">{location.label}</h4>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    {location.city}
+                    {location.state && `, ${location.state}`}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-500">{location.stadium_name}</p>
+                  {location.group_label && (
+                    <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">{location.group_label}</p>
+                  )}
+                  {location.matchday && (
+                    <p className="text-sm text-slate-500 dark:text-slate-500">Matchday {location.matchday}</p>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      <div className="w-full h-[600px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+        </div>
+      ) : (
+        <div className="w-full h-[600px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
         <MapContainer
           center={center}
           zoom={zoom}
@@ -352,7 +429,8 @@ export function TournamentMap({ locations, edges }: TournamentMapProps) {
             </Marker>
           ))}
         </MapContainer>
-      </div>
+        </div>
+      )}
     </Card>
   );
 }
