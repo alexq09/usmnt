@@ -151,3 +151,25 @@ export async function getMatchTrends(): Promise<MatchTrend[]> {
     };
   });
 }
+
+export interface ResultCorrelationMetric {
+  metric_key: string | null;
+  metric_label: string | null;
+  avg_win: number | null;
+  avg_draw: number | null;
+  avg_loss: number | null;
+  delta_win_loss: number | null;
+}
+
+export async function getResultCorrelationMetrics(): Promise<ResultCorrelationMetric[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("result_correlation_metrics")
+    .select("*")
+    .order("delta_win_loss", { ascending: false, nullsFirst: false });
+
+  if (error) throw error;
+
+  return data || [];
+}

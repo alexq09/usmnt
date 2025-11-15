@@ -2,16 +2,19 @@ import {
   getTeamStats,
   getTopPerformers,
   getMatchTrends,
+  getResultCorrelationMetrics,
 } from "@/lib/dashboard-data";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { TopPerformers } from "@/components/dashboard/TopPerformers";
 import { TeamCharts } from "@/components/dashboard/TeamCharts";
+import { WinLossDrivers } from "@/components/dashboard/WinLossDrivers";
 
 export default async function Home() {
-  const [teamStats, topPerformers, matchTrends] = await Promise.all([
+  const [teamStats, topPerformers, matchTrends, correlationMetrics] = await Promise.all([
     getTeamStats(),
     getTopPerformers(),
     getMatchTrends(),
+    getResultCorrelationMetrics(),
   ]);
 
   return (
@@ -36,6 +39,8 @@ export default async function Home() {
           />
 
           <TeamCharts matchTrends={matchTrends} />
+
+          <WinLossDrivers metrics={correlationMetrics} />
         </div>
       </div>
     </div>
