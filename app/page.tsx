@@ -22,7 +22,7 @@ export default async function Home() {
             USMNT Dashboard
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            Team performance insights and player analytics
+            Team performance insights and player analytics since the 2022 World Cup
           </p>
         </div>
 

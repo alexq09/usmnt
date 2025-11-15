@@ -15,7 +15,7 @@ export default async function PlayersPage() {
             USMNT Player Stats
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            Click any player to view detailed statistics and performance charts
+            All statistics compiled from matches after the 2022 World Cup. Click any player for detailed performance charts.
           </p>
         </div>
         <PlayerGrid players={players || []} />
