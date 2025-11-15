@@ -37,12 +37,22 @@ function formatValue(value: number | null, metricKey: string | null): string {
   return value.toFixed(2);
 }
 
+function getNormalizedDelta(metric: ResultCorrelationMetric): number {
+  const delta = metric.delta_win_loss || 0;
+  if (isPercentageMetric(metric.metric_key)) {
+    return delta * 100;
+  }
+  return delta;
+}
+
 export function WinLossDrivers({ metrics }: WinLossDriversProps) {
-  const filteredMetrics = metrics.filter((m) => m.metric_key !== "possession_pct");
+  const filteredMetrics = metrics
+    .filter((m) => m.metric_key !== "possession_pct")
+    .sort((a, b) => getNormalizedDelta(b) - getNormalizedDelta(a));
 
   const chartData = filteredMetrics.map((m) => ({
     metric: m.metric_label || "Unknown",
-    delta: m.delta_win_loss || 0,
+    delta: getNormalizedDelta(m),
     metricKey: m.metric_key,
   }));
 
