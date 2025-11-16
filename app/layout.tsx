@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "USMNT Analytics",
   description: "USMNT team and player performance analytics",
+  icons: {
+    icon: "/soccer.png",
+  },
 };
 
 export default function RootLayout({
