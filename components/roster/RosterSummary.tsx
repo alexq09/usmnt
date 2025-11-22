@@ -4,6 +4,7 @@ import { Tables } from "@/lib/database.types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Trash2, CheckCircle2 } from "lucide-react";
+import { getPositionCategory } from "@/lib/position-utils";
 
 type Player = Tables<"players">;
 
@@ -14,10 +15,15 @@ interface RosterSummaryProps {
 
 export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) {
   const positionCounts = selectedPlayers.reduce((acc, player) => {
-    const position = player.position || "Unknown";
-    acc[position] = (acc[position] || 0) + 1;
+    const category = getPositionCategory(player.position);
+    acc[category] = (acc[category] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  const sortedPositions = Object.entries(positionCounts).sort((a, b) => {
+    const order = ["Goalkeeper", "Defender", "Midfielder", "Forward"];
+    return order.indexOf(a[0]) - order.indexOf(b[0]);
+  });
 
   const isComplete = selectedPlayers.length === 26;
   const progress = (selectedPlayers.length / 26) * 100;
@@ -77,7 +83,7 @@ export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) 
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {Object.entries(positionCounts).map(([position, count]) => (
+            {sortedPositions.map(([position, count]) => (
               <div
                 key={position}
                 className="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg"

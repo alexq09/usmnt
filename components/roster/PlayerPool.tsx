@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { POSITION_CATEGORIES } from "@/lib/position-utils";
 
 type Player = Tables<"players">;
 
@@ -21,7 +22,6 @@ interface PlayerPoolProps {
   onSearchChange: (term: string) => void;
   positionFilter: string;
   onPositionFilterChange: (position: string) => void;
-  positions: (string | null)[];
   isRosterFull: boolean;
 }
 
@@ -32,7 +32,6 @@ export function PlayerPool({
   onSearchChange,
   positionFilter,
   onPositionFilterChange,
-  positions,
   isRosterFull,
 }: PlayerPoolProps) {
   return (
@@ -59,12 +58,10 @@ export function PlayerPool({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All positions</SelectItem>
-            {positions.map(position => (
-              position && (
-                <SelectItem key={position} value={position}>
-                  {position}
-                </SelectItem>
-              )
+            {POSITION_CATEGORIES.map(category => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>

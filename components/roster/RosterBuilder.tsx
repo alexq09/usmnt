@@ -5,6 +5,7 @@ import { Tables } from "@/lib/database.types";
 import { RosterGrid } from "./RosterGrid";
 import { PlayerPool } from "./PlayerPool";
 import { RosterSummary } from "./RosterSummary";
+import { getPositionCategory } from "@/lib/position-utils";
 
 type Player = Tables<"players">;
 
@@ -37,11 +38,10 @@ export function RosterBuilder({ players }: RosterBuilderProps) {
 
   const filteredPlayers = availablePlayers.filter(player => {
     const matchesSearch = player.full_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPosition = positionFilter === "all" || player.position === positionFilter;
+    const playerCategory = getPositionCategory(player.position);
+    const matchesPosition = positionFilter === "all" || playerCategory === positionFilter;
     return matchesSearch && matchesPosition;
   });
-
-  const positions = Array.from(new Set(players.map(p => p.position).filter(Boolean)));
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -76,7 +76,6 @@ export function RosterBuilder({ players }: RosterBuilderProps) {
               onSearchChange={setSearchTerm}
               positionFilter={positionFilter}
               onPositionFilterChange={setPositionFilter}
-              positions={positions}
               isRosterFull={selectedPlayers.length >= 26}
             />
           </div>

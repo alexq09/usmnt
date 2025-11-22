@@ -3,6 +3,7 @@
 import { Tables } from "@/lib/database.types";
 import { X } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { getPositionCategory } from "@/lib/position-utils";
 
 type Player = Tables<"players">;
 
@@ -13,11 +14,11 @@ interface RosterGridProps {
 
 export function RosterGrid({ selectedPlayers, onRemove }: RosterGridProps) {
   const groupedByPosition = selectedPlayers.reduce((acc, player) => {
-    const position = player.position || "Unknown";
-    if (!acc[position]) {
-      acc[position] = [];
+    const category = getPositionCategory(player.position);
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    acc[position].push(player);
+    acc[category].push(player);
     return acc;
   }, {} as Record<string, Player[]>);
 
