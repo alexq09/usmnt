@@ -67,9 +67,19 @@ export function RosterBuilder({ players }: RosterBuilderProps) {
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             World Cup Roster Builder
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Build your 26-man squad for the World Cup
+          <p className="text-slate-600 dark:text-slate-400 mb-3">
+            Build your 26-man squad and select your starting 11 for the World Cup
           </p>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800">
+              <span className="font-semibold">Step 1:</span>
+              <span>Select 26 players for your roster</span>
+            </div>
+            <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800">
+              <span className="font-semibold">Step 2:</span>
+              <span>Click the star icon to choose your starting 11</span>
+            </div>
+          </div>
         </div>
 
         <RosterSummary

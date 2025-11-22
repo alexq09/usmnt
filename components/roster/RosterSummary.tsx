@@ -220,18 +220,20 @@ export function RosterSummary({ selectedPlayers, starterIds, onClear }: RosterSu
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
             onClick={copyToClipboard}
-            disabled={selectedPlayers.length === 0}
+            disabled={!isComplete || !isStarting11Complete}
             variant="outline"
             className="flex items-center gap-2"
+            title={!isComplete ? "Select 26 players first" : !isStarting11Complete ? "Select 11 starters first" : ""}
           >
             <Download className="w-4 h-4" />
             Copy
           </Button>
           <Button
             onClick={exportRoster}
-            disabled={selectedPlayers.length === 0}
+            disabled={!isComplete || !isStarting11Complete}
             variant="outline"
             className="flex items-center gap-2"
+            title={!isComplete ? "Select 26 players first" : !isStarting11Complete ? "Select 11 starters first" : ""}
           >
             <Download className="w-4 h-4" />
             Export
