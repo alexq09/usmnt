@@ -55,7 +55,7 @@ export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) 
     const padding = 60;
     const titleHeight = 120;
     const categorySpacing = 40;
-    const playerHeight = 36;
+    const playerHeight = 50;
     const columnWidth = (width - padding * 2 - 30) / 2;
 
     let totalHeight = titleHeight + padding;
@@ -110,12 +110,11 @@ export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) 
         ctx.fillStyle = '#ffffff';
         ctx.font = '16px Inter, system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(player.full_name, x + 12, y + 23);
+        ctx.fillText(player.full_name, x + 12, y + 18);
 
         ctx.fillStyle = '#94a3b8';
-        ctx.font = '13px Inter, system-ui, -apple-system, sans-serif';
-        const textWidth = ctx.measureText(player.full_name).width;
-        ctx.fillText(`(${player.position})`, x + 12 + textWidth + 8, y + 23);
+        ctx.font = '12px Inter, system-ui, -apple-system, sans-serif';
+        ctx.fillText(player.position || '', x + 12, y + 35);
       });
 
       currentY += Math.ceil(players.length / 2) * playerHeight + categorySpacing;
