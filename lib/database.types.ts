@@ -498,65 +498,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_rosters: {
-        Row: {
-          id: string
-          roster_name: string
-          created_at: string
-          updated_at: string
-          session_id: string
-        }
-        Insert: {
-          id?: string
-          roster_name?: string
-          created_at?: string
-          updated_at?: string
-          session_id: string
-        }
-        Update: {
-          id?: string
-          roster_name?: string
-          created_at?: string
-          updated_at?: string
-          session_id?: string
-        }
-        Relationships: []
-      }
-      roster_selections: {
-        Row: {
-          id: string
-          roster_id: string
-          player_id: string
-          position_group: string
-          sort_order: number
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          roster_id: string
-          player_id: string
-          position_group: string
-          sort_order?: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          roster_id?: string
-          player_id?: string
-          position_group?: string
-          sort_order?: number
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "roster_selections_roster_id_fkey"
-            columns: ["roster_id"]
-            isOneToOne: false
-            referencedRelation: "user_rosters"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
     }
     Views: {
       match_team_stats: {
