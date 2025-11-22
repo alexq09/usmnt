@@ -12,6 +12,7 @@ export function Navigation() {
     { href: "/", label: "Dashboard" },
     { href: "/players", label: "Players" },
     { href: "/tournament-map", label: "Tournament Map" },
+    { href: "/roster-builder", label: "Roster Builder" },
   ];
 
   return (
