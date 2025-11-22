@@ -22,6 +22,14 @@ export function RosterGrid({ selectedPlayers, onRemove }: RosterGridProps) {
     return acc;
   }, {} as Record<string, Player[]>);
 
+  Object.keys(groupedByPosition).forEach(category => {
+    groupedByPosition[category].sort((a, b) => {
+      const aLast = a.last_name || a.full_name;
+      const bLast = b.last_name || b.full_name;
+      return aLast.localeCompare(bLast);
+    });
+  });
+
   const positionOrder = ["Goalkeeper", "Defender", "Midfielder", "Forward"];
   const sortedPositions = Object.keys(groupedByPosition).sort((a, b) => {
     const aIndex = positionOrder.indexOf(a);

@@ -34,6 +34,12 @@ export function PlayerPool({
   onPositionFilterChange,
   isRosterFull,
 }: PlayerPoolProps) {
+  const sortedPlayers = [...players].sort((a, b) => {
+    const aLast = a.last_name || a.full_name;
+    const bLast = b.last_name || b.full_name;
+    return aLast.localeCompare(bLast);
+  });
+
   return (
     <Card className="p-6 sticky top-4">
       <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">
@@ -76,14 +82,14 @@ export function PlayerPool({
       )}
 
       <div className="space-y-2 max-h-[calc(100vh-24rem)] overflow-y-auto">
-        {players.length === 0 ? (
+        {sortedPlayers.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-slate-500 dark:text-slate-400 text-sm">
               No players found
             </p>
           </div>
         ) : (
-          players.map(player => (
+          sortedPlayers.map(player => (
             <div
               key={player.id}
               className="group flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
