@@ -15,6 +15,7 @@ interface RosterBuilderProps {
 
 export function RosterBuilder({ players }: RosterBuilderProps) {
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
+  const [starterIds, setStarterIds] = useState<Set<number>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
   const [positionFilter, setPositionFilter] = useState<string>("all");
 
@@ -26,10 +27,26 @@ export function RosterBuilder({ players }: RosterBuilderProps) {
 
   const removePlayer = (playerId: number) => {
     setSelectedPlayers(selectedPlayers.filter(p => p.id !== playerId));
+    const newStarters = new Set(starterIds);
+    newStarters.delete(playerId);
+    setStarterIds(newStarters);
+  };
+
+  const toggleStarter = (playerId: number) => {
+    const newStarters = new Set(starterIds);
+    if (newStarters.has(playerId)) {
+      newStarters.delete(playerId);
+    } else {
+      if (newStarters.size < 11) {
+        newStarters.add(playerId);
+      }
+    }
+    setStarterIds(newStarters);
   };
 
   const clearRoster = () => {
     setSelectedPlayers([]);
+    setStarterIds(new Set());
   };
 
   const availablePlayers = players.filter(
@@ -57,6 +74,7 @@ export function RosterBuilder({ players }: RosterBuilderProps) {
 
         <RosterSummary
           selectedPlayers={selectedPlayers}
+          starterIds={starterIds}
           onClear={clearRoster}
         />
 
@@ -64,7 +82,9 @@ export function RosterBuilder({ players }: RosterBuilderProps) {
           <div className="lg:col-span-2">
             <RosterGrid
               selectedPlayers={selectedPlayers}
+              starterIds={starterIds}
               onRemove={removePlayer}
+              onToggleStarter={toggleStarter}
             />
           </div>
 

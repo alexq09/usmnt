@@ -10,10 +10,11 @@ type Player = Tables<"players">;
 
 interface RosterSummaryProps {
   selectedPlayers: Player[];
+  starterIds: Set<number>;
   onClear: () => void;
 }
 
-export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) {
+export function RosterSummary({ selectedPlayers, starterIds, onClear }: RosterSummaryProps) {
   const positionCounts = selectedPlayers.reduce((acc, player) => {
     const category = getPositionCategory(player.position);
     acc[category] = (acc[category] || 0) + 1;
@@ -27,6 +28,8 @@ export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) 
 
   const isComplete = selectedPlayers.length === 26;
   const progress = (selectedPlayers.length / 26) * 100;
+  const starterCount = starterIds.size;
+  const isStarting11Complete = starterCount === 11;
 
   const exportRoster = () => {
     const groupedByPosition = selectedPlayers.reduce((acc, player) => {
@@ -103,18 +106,34 @@ export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) 
         const row = Math.floor(index / 2);
         const x = padding + col * (columnWidth + 30);
         const y = currentY + row * playerHeight;
+        const isStarter = starterIds.has(player.id);
 
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-        ctx.fillRect(x, y, columnWidth, playerHeight - 4);
+        if (isStarter) {
+          ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+          ctx.fillRect(x, y, columnWidth, playerHeight - 4);
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '16px Inter, system-ui, -apple-system, sans-serif';
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x, y, columnWidth, playerHeight - 4);
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+          ctx.fillRect(x, y, columnWidth, playerHeight - 4);
+        }
+
+        if (isStarter) {
+          ctx.fillStyle = '#3b82f6';
+          ctx.font = 'bold 14px Inter, system-ui, -apple-system, sans-serif';
+          ctx.fillText('★', x + 12, y + 20);
+        }
+
+        ctx.fillStyle = isStarter ? '#ffffff' : '#ffffff';
+        ctx.font = isStarter ? 'bold 16px Inter, system-ui, -apple-system, sans-serif' : '16px Inter, system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(player.full_name, x + 12, y + 18);
+        ctx.fillText(player.full_name, x + (isStarter ? 28 : 12), y + 18);
 
-        ctx.fillStyle = '#94a3b8';
+        ctx.fillStyle = isStarter ? '#93c5fd' : '#94a3b8';
         ctx.font = '12px Inter, system-ui, -apple-system, sans-serif';
-        ctx.fillText(player.position || '', x + 12, y + 35);
+        ctx.fillText(player.position || '', x + (isStarter ? 28 : 12), y + 35);
       });
 
       currentY += Math.ceil(players.length / 2) * playerHeight + categorySpacing;
@@ -150,7 +169,7 @@ export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) 
     <Card className="p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {selectedPlayers.length} / 26
             </h2>
@@ -158,6 +177,16 @@ export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) 
               <div className="flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-sm font-medium">
                 <CheckCircle2 className="w-4 h-4" />
                 Complete
+              </div>
+            )}
+            {selectedPlayers.length > 0 && (
+              <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
+                isStarting11Complete
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+              }`}>
+                <CheckCircle2 className={`w-4 h-4 ${isStarting11Complete ? '' : 'opacity-30'}`} />
+                Starting 11: {starterCount} / 11
               </div>
             )}
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Tables } from "@/lib/database.types";
-import { X } from "lucide-react";
+import { X, Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getPositionCategory } from "@/lib/position-utils";
 
@@ -9,10 +9,12 @@ type Player = Tables<"players">;
 
 interface RosterGridProps {
   selectedPlayers: Player[];
+  starterIds: Set<number>;
   onRemove: (playerId: number) => void;
+  onToggleStarter: (playerId: number) => void;
 }
 
-export function RosterGrid({ selectedPlayers, onRemove }: RosterGridProps) {
+export function RosterGrid({ selectedPlayers, starterIds, onRemove, onToggleStarter }: RosterGridProps) {
   const groupedByPosition = selectedPlayers.reduce((acc, player) => {
     const category = getPositionCategory(player.position);
     if (!acc[category]) {
@@ -70,28 +72,54 @@ export function RosterGrid({ selectedPlayers, onRemove }: RosterGridProps) {
                 {position}s ({groupedByPosition[position].length})
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {groupedByPosition[position].map(player => (
-                  <div
-                    key={player.id}
-                    className="group flex items-center justify-between bg-slate-100 dark:bg-slate-800 rounded-lg p-3 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                        {player.full_name}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {player.position}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => onRemove(player.id)}
-                      className="ml-2 p-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                      aria-label="Remove player"
+                {groupedByPosition[position].map(player => {
+                  const isStarter = starterIds.has(player.id);
+                  return (
+                    <div
+                      key={player.id}
+                      className={`group flex items-center justify-between rounded-lg p-3 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all ${
+                        isStarter
+                          ? 'bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-900/20 border-2 border-blue-400 dark:border-blue-500'
+                          : 'bg-slate-100 dark:bg-slate-800'
+                      }`}
                     >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                      <button
+                        onClick={() => onToggleStarter(player.id)}
+                        className={`mr-2 p-1.5 rounded-full transition-colors ${
+                          isStarter
+                            ? 'text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800/50'
+                            : 'text-slate-300 dark:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-500'
+                        }`}
+                        aria-label={isStarter ? "Remove from starting 11" : "Add to starting 11"}
+                      >
+                        <Star className={`w-4 h-4 ${isStarter ? 'fill-current' : ''}`} />
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium truncate ${
+                          isStarter
+                            ? 'text-blue-900 dark:text-blue-100'
+                            : 'text-slate-900 dark:text-slate-100'
+                        }`}>
+                          {player.full_name}
+                        </p>
+                        <p className={`text-xs ${
+                          isStarter
+                            ? 'text-blue-700 dark:text-blue-300'
+                            : 'text-slate-500 dark:text-slate-400'
+                        }`}>
+                          {player.position}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => onRemove(player.id)}
+                        className="ml-2 p-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                        aria-label="Remove player"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
