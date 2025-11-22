@@ -29,19 +29,109 @@ export function RosterSummary({ selectedPlayers, onClear }: RosterSummaryProps) 
   const progress = (selectedPlayers.length / 26) * 100;
 
   const exportRoster = () => {
-    const rosterText = selectedPlayers
-      .map(p => `${p.full_name} (${p.position})`)
-      .join('\n');
+    const groupedByPosition = selectedPlayers.reduce((acc, player) => {
+      const category = getPositionCategory(player.position);
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(player);
+      return acc;
+    }, {} as Record<string, Player[]>);
 
-    const blob = new Blob([rosterText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'world-cup-roster.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    Object.keys(groupedByPosition).forEach(category => {
+      groupedByPosition[category].sort((a, b) => {
+        const aLast = a.last_name || a.full_name;
+        const bLast = b.last_name || b.full_name;
+        return aLast.localeCompare(bLast);
+      });
+    });
+
+    const positionOrder = ["Goalkeeper", "Defender", "Midfielder", "Forward"];
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = 1200;
+    const padding = 60;
+    const titleHeight = 120;
+    const categorySpacing = 40;
+    const playerHeight = 36;
+    const columnWidth = (width - padding * 2 - 30) / 2;
+
+    let totalHeight = titleHeight + padding;
+    positionOrder.forEach(category => {
+      const players = groupedByPosition[category] || [];
+      if (players.length > 0) {
+        totalHeight += 50 + Math.ceil(players.length / 2) * playerHeight + categorySpacing;
+      }
+    });
+    totalHeight += padding;
+
+    canvas.width = width;
+    canvas.height = totalHeight;
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#0f172a');
+    gradient.addColorStop(1, '#1e293b');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 48px Inter, system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('World Cup Roster', width / 2, padding + 50);
+
+    ctx.font = '20px Inter, system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(`${selectedPlayers.length} Players Selected`, width / 2, padding + 85);
+
+    let currentY = titleHeight + padding;
+
+    positionOrder.forEach(category => {
+      const players = groupedByPosition[category] || [];
+      if (players.length === 0) return;
+
+      ctx.fillStyle = '#3b82f6';
+      ctx.font = 'bold 24px Inter, system-ui, -apple-system, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${category}s (${players.length})`, padding, currentY + 30);
+
+      currentY += 50;
+
+      players.forEach((player, index) => {
+        const col = index % 2;
+        const row = Math.floor(index / 2);
+        const x = padding + col * (columnWidth + 30);
+        const y = currentY + row * playerHeight;
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.fillRect(x, y, columnWidth, playerHeight - 4);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px Inter, system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(player.full_name, x + 12, y + 23);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '13px Inter, system-ui, -apple-system, sans-serif';
+        const textWidth = ctx.measureText(player.full_name).width;
+        ctx.fillText(`(${player.position})`, x + 12 + textWidth + 8, y + 23);
+      });
+
+      currentY += Math.ceil(players.length / 2) * playerHeight + categorySpacing;
+    });
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'world-cup-roster.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 'image/png');
   };
 
   const copyToClipboard = async () => {
