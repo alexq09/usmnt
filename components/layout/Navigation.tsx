@@ -11,6 +11,7 @@ export function Navigation() {
   const navLinks = [
     { href: "/", label: "Dashboard" },
     { href: "/players", label: "Players" },
+    { href: "/roster-builder", label: "Roster Builder" },
     { href: "/tournament-map", label: "Tournament Map" },
   ];
 
