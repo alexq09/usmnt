@@ -109,31 +109,27 @@ export function RosterSummary({ selectedPlayers, starterIds, onClear }: RosterSu
         const isStarter = starterIds.has(player.id);
 
         if (isStarter) {
-          ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+          ctx.fillStyle = 'rgba(34, 197, 94, 0.2)';
           ctx.fillRect(x, y, columnWidth, playerHeight - 4);
 
-          ctx.strokeStyle = '#3b82f6';
-          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#22c55e';
+          ctx.lineWidth = 3;
           ctx.strokeRect(x, y, columnWidth, playerHeight - 4);
         } else {
           ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
           ctx.fillRect(x, y, columnWidth, playerHeight - 4);
         }
 
-        if (isStarter) {
-          ctx.fillStyle = '#3b82f6';
-          ctx.font = 'bold 14px Inter, system-ui, -apple-system, sans-serif';
-          ctx.fillText('★', x + 12, y + 20);
-        }
-
-        ctx.fillStyle = isStarter ? '#ffffff' : '#ffffff';
+        ctx.fillStyle = '#ffffff';
         ctx.font = isStarter ? 'bold 16px Inter, system-ui, -apple-system, sans-serif' : '16px Inter, system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(player.full_name, x + (isStarter ? 28 : 12), y + 18);
+        ctx.fillText(player.full_name, x + 12, y + 18);
 
-        ctx.fillStyle = isStarter ? '#93c5fd' : '#94a3b8';
-        ctx.font = '12px Inter, system-ui, -apple-system, sans-serif';
-        ctx.fillText(player.position || '', x + (isStarter ? 28 : 12), y + 35);
+        const positionText = player.position || '';
+        const starterLabel = isStarter ? ' • STARTER' : '';
+        ctx.fillStyle = isStarter ? '#22c55e' : '#94a3b8';
+        ctx.font = isStarter ? 'bold 12px Inter, system-ui, -apple-system, sans-serif' : '12px Inter, system-ui, -apple-system, sans-serif';
+        ctx.fillText(positionText + starterLabel, x + 12, y + 35);
       });
 
       currentY += Math.ceil(players.length / 2) * playerHeight + categorySpacing;
@@ -152,18 +148,6 @@ export function RosterSummary({ selectedPlayers, starterIds, onClear }: RosterSu
     }, 'image/png');
   };
 
-  const copyToClipboard = async () => {
-    const rosterText = selectedPlayers
-      .map(p => `${p.full_name} (${p.position})`)
-      .join('\n');
-
-    try {
-      await navigator.clipboard.writeText(rosterText);
-      alert('Roster copied to clipboard!');
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
 
   return (
     <Card className="p-6">
@@ -219,16 +203,6 @@ export function RosterSummary({ selectedPlayers, starterIds, onClear }: RosterSu
 
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
-            onClick={copyToClipboard}
-            disabled={!isComplete || !isStarting11Complete}
-            variant="outline"
-            className="flex items-center gap-2"
-            title={!isComplete ? "Select 26 players first" : !isStarting11Complete ? "Select 11 starters first" : ""}
-          >
-            <Download className="w-4 h-4" />
-            Copy
-          </Button>
-          <Button
             onClick={exportRoster}
             disabled={!isComplete || !isStarting11Complete}
             variant="outline"
@@ -236,7 +210,7 @@ export function RosterSummary({ selectedPlayers, starterIds, onClear }: RosterSu
             title={!isComplete ? "Select 26 players first" : !isStarting11Complete ? "Select 11 starters first" : ""}
           >
             <Download className="w-4 h-4" />
-            Export
+            Export PNG
           </Button>
           <Button
             onClick={onClear}
